@@ -221,6 +221,7 @@ TilesetDock::TilesetDock(QWidget *parent):
     mEditTerrain(new QAction(this)),
     mAddTiles(new QAction(this)),
     mRemoveTiles(new QAction(this)),
+    mReorderTiles(new QAction(this)),
     mTilesetMenuButton(new TilesetMenuButton(this)),
     mTilesetMenu(new QMenu(this)),
     mTilesetActionGroup(new QActionGroup(this)),
@@ -265,6 +266,7 @@ TilesetDock::TilesetDock(QWidget *parent):
     mEditTerrain->setIcon(QIcon(QLatin1String(":images/16x16/terrain.png")));
     mAddTiles->setIcon(QIcon(QLatin1String(":images/16x16/add.png")));
     mRemoveTiles->setIcon(QIcon(QLatin1String(":images/16x16/remove.png")));
+    mReorderTiles->setIcon(QIcon(QLatin1String(":images/16x16/layer-tile.png")));
 
     Utils::setThemeIcon(mNewTileset, "document-new");
     Utils::setThemeIcon(mImportTileset, "document-import");
@@ -290,6 +292,8 @@ TilesetDock::TilesetDock(QWidget *parent):
             SLOT(addTiles()));
     connect(mRemoveTiles, SIGNAL(triggered()),
             SLOT(removeTiles()));
+    connect(mReorderTiles, SIGNAL(triggered()),
+            SLOT(reorderTiles()));
 
     mToolBar->addAction(mNewTileset);
     mToolBar->setIconSize(QSize(16, 16));
@@ -300,6 +304,8 @@ TilesetDock::TilesetDock(QWidget *parent):
     mToolBar->addAction(mEditTerrain);
     mToolBar->addAction(mAddTiles);
     mToolBar->addAction(mRemoveTiles);
+    mToolBar->addAction(mReorderTiles);
+    mReorderTiles->setCheckable(true);
 
     mZoomable = new Zoomable(this);
     mZoomComboBox = new QComboBox;
@@ -572,6 +578,7 @@ void TilesetDock::updateActions()
     mAddTiles->setEnabled(tilesetIsDisplayed && isCollection && !external);
     mRemoveTiles->setEnabled(tilesetIsDisplayed && isCollection
                              && hasSelection && !external);
+    mReorderTiles->setEnabled(tilesetIsDisplayed && !external);
 }
 
 void TilesetDock::updateCurrentTiles()
@@ -824,6 +831,7 @@ void TilesetDock::retranslateUi()
     mEditTerrain->setText(tr("Edit &Terrain Information"));
     mAddTiles->setText(tr("Add Tiles"));
     mRemoveTiles->setText(tr("Remove Tiles"));
+    mReorderTiles->setText(tr("Reorder Tiles"));
 }
 
 Tileset *TilesetDock::currentTileset() const
@@ -1048,6 +1056,34 @@ void TilesetDock::removeTiles()
     // Clear the current tiles, will be referencing the removed tiles
     setCurrentTiles(nullptr);
     setCurrentTile(nullptr);
+}
+
+void TilesetDock::reorderTiles()
+{
+    TilesetView *view = currentTilesetView();
+
+    if (mReorderTiles->isChecked())
+    {
+        // enable drag and drop
+
+        view->clearSelection();
+        view->setSelectionMode(QAbstractItemView::SingleSelection);
+        view->setDefaultDropAction(Qt::MoveAction);
+        view->setDragDropMode(QAbstractItemView::InternalMove);
+        view->setDragEnabled(true);
+        view->viewport()->setAcceptDrops(true);
+        view->setDropIndicatorShown(true);
+    }
+    else
+    {
+        // disable drag and drop
+
+        view->clearSelection();
+        view->setDragEnabled(false);
+        view->viewport()->setAcceptDrops(false);
+        view->setDropIndicatorShown(false);
+        view->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    }
 }
 
 void TilesetDock::tilesetNameChanged(Tileset *tileset)

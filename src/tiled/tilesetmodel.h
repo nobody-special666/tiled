@@ -83,6 +83,7 @@ public:
 
     QStringList mimeTypes() const override;
     QMimeData *mimeData(const QModelIndexList &indexes) const override;
+    bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
 
     /**
      * Returns the tile at the given index.
@@ -117,6 +118,9 @@ public:
      * Performs a reset on the model.
      */
     void resetModel();
+
+    bool removeRows(int row, int count, const QModelIndex &parent);
+    Qt::DropActions supportedDropActions() const override;
 
 public slots:
     /**
