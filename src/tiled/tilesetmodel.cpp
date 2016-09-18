@@ -236,39 +236,6 @@ Qt::DropActions TilesetModel::supportedDropActions() const
     return Qt::CopyAction | Qt::MoveAction;
 }
 
-bool TilesetModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent)
-{
-    (void)row;
-    (void)column;
-
-    if (action == Qt::IgnoreAction)
-        return true;
-
-    if (action !=  Qt::MoveAction)
-        return false;
-
-    const QString mimeformat= QString::fromUtf8(TILES_MIMETYPE);
-    if (!data->hasFormat(mimeformat))
-        return false;
-
-    QByteArray encodedData = data->data(mimeformat);
-    QDataStream stream(&encodedData, QIODevice::ReadOnly);
-    QStringList newItems;
-
-    // currently only supports moving one tile at a time.
-    int srcTileID;
-    stream >> srcTileID;
-    Tile *srcTile= mTileset->findTile(srcTileID);
-    Tile *destTile= tileAt(parent);
-    mTileset->setTileOrder(srcTile, mTileset->tileOrder(destTile));
-    tilesetChanged();
-
-    for (int i=0; i<mTileIds.size(); i++)
-        tileChanged(mTileset->tileAt(mTileIds[i]));
-
-    return true;
-}
-
 bool TilesetModel::removeRows(int row, int count, const QModelIndex &parent)
 {
     (void)row;

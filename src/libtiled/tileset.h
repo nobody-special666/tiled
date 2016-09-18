@@ -124,6 +124,7 @@ public:
     void setTileOrder(Tile *tile, int index);
     void rebuildTileOrder();
     int tileOrder(const Tile *tile) const;
+    void setOrderedTileset(const QMap<int, Tile*> order);
     const QMap<int, Tile*> orderedTiles();
     int tileCount() const;
 

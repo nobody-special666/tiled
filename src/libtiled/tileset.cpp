@@ -170,6 +170,15 @@ int Tileset::tileOrder(const Tile *tile) const
 }
 
 /**
+ * Sets an ordered tileset list for undo
+ */
+void Tileset::setOrderedTileset(const QMap<int, Tile*> order)
+{
+    mOrderedTiles= order;
+    mOrderedTiles.detach();
+}
+
+/**
  * Retuns an ordered tile list for display in the TilesetDock.
  */
 const QMap<int, Tile*> Tileset::orderedTiles()

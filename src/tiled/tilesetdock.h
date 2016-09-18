@@ -136,7 +136,7 @@ private slots:
     void editTerrain();
     void addTiles();
     void removeTiles();
-    void reorderTiles();
+    void reorderTiles(bool enabled);
 
     void documentAboutToClose(MapDocument *mapDocument);
 

@@ -292,8 +292,8 @@ TilesetDock::TilesetDock(QWidget *parent):
             SLOT(addTiles()));
     connect(mRemoveTiles, SIGNAL(triggered()),
             SLOT(removeTiles()));
-    connect(mReorderTiles, SIGNAL(triggered()),
-            SLOT(reorderTiles()));
+    connect(mReorderTiles, SIGNAL(toggled(bool)),
+            SLOT(reorderTiles(bool)));
 
     mToolBar->addAction(mNewTileset);
     mToolBar->setIconSize(QSize(16, 16));
@@ -521,6 +521,12 @@ void TilesetDock::dropEvent(QDropEvent *e)
 
 void TilesetDock::currentTilesetChanged()
 {
+    if (mReorderTiles->isChecked())
+    {
+        mReorderTiles->setChecked(false);
+        reorderTiles(false);
+    }
+
     if (const TilesetView *view = currentTilesetView())
         if (const QItemSelectionModel *s = view->selectionModel())
             setCurrentTile(view->tilesetModel()->tileAt(s->currentIndex()));
@@ -578,6 +584,9 @@ void TilesetDock::updateActions()
     mAddTiles->setEnabled(tilesetIsDisplayed && isCollection && !external);
     mRemoveTiles->setEnabled(tilesetIsDisplayed && isCollection
                              && hasSelection && !external);
+
+    if (mReorderTiles->isEnabled() && external)
+        reorderTiles(false);
     mReorderTiles->setEnabled(tilesetIsDisplayed && !external);
 }
 
@@ -1058,11 +1067,13 @@ void TilesetDock::removeTiles()
     setCurrentTile(nullptr);
 }
 
-void TilesetDock::reorderTiles()
+void TilesetDock::reorderTiles(bool enabled)
 {
     TilesetView *view = currentTilesetView();
+    if (!view)
+        return;
 
-    if (mReorderTiles->isChecked())
+    if (enabled)
     {
         // enable drag and drop
 
